@@ -154,9 +154,9 @@ pipeline. The gate does not open for a hostname that only resolves.
                        ╚═════════════╤═════════════╝
                                      │
    ┌── active ───┬── content ──┬── analyze ─┬── report ──┐
-   │  nmap       │  dir/file   │  rank      │  section-8  │
-   │  curl·tls   │  fuzzing    │  leads     │  note        │
-   └─────────────┴─────────────┴────────────┴─────────────┘
+   │  nmap       │  dir/file   │  rank      │  section-8 │
+   │  curl·tls   │  fuzzing    │  leads     │  note      │
+   └─────────────┴─────────────┴────────────┴────────────┘
 ```
 
 The same commands work non-interactively:
