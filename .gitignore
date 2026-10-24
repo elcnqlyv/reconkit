@@ -1,0 +1,17 @@
+# reconkit working output — NEVER commit case data (client targets, scan results)
+recon/
+*.current
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+venv/
+
+# editors / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
