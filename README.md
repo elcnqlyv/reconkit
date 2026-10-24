@@ -3,7 +3,7 @@
   <a href="https://github.com/elcnqlyv/reconkit" target="_blank"><img src="reconkit-banner.svg" alt="reconkit" width="72%"/></a>
   <br>
   <br>
-  <span>Combined <b>external + internal</b> reconnaissance in one evidence-driven CLI &mdash; passive &rarr; scope &rarr; active, <b>leads, not verdicts</b>.</span>
+  <span>External and internal reconnaissance in one CLI. Passive, scope, then active. <b>Leads, not verdicts</b>.</span>
   <br>
 </p>
 
@@ -46,28 +46,29 @@ $ python3 recon.py
 | '_/ -_) _/ _ \ ' \| / / |  _|
 |_| \___\__\___/_||_|_\_\_|\__|
 
-  reconkit — combined external + internal recon orchestrator
+  reconkit · combined external + internal recon orchestrator
   authorized testing only · leads, not verdicts · every command logged
 ```
 
-One command-line tool that combines two pentest cheat sheets into a single,
-evidence-driven workflow:
+One command-line tool combines two pentest cheat sheets into one workflow:
 
-- **External / public-target recon** (domain & IP) — passive → scope → active
+- **External and public-target recon** (domain and IP): passive, then scope, then active
 - **Internal network discovery** (post-foothold)
-- **Content / directory discovery** (native fuzzer, or `ffuf` / `gobuster`)
+- **Content and directory discovery** (native fuzzer, or `ffuf` / `gobuster`)
 - **OSINT harvest** (`theHarvester`, or a native stdlib fallback)
-- **Lead triage + report note** — surfaces the point(s) to elaborate on
+- **Lead triage and report note**: it shows the main point to elaborate
 
-Pure Python 3 standard library. External binaries (`dig`, `nmap`, `nc`, `curl`,
-`openssl`, `whois`, `ffuf`, `gobuster`, `subfinder`, `theHarvester`) are used
-when present and degrade gracefully when absent.
+reconkit uses the Python 3 standard library only. It calls external binaries
+(`dig`, `nmap`, `nc`, `curl`, `openssl`, `whois`, `ffuf`, `gobuster`,
+`subfinder`, `theHarvester`) when they are present. It still runs when they are
+absent.
 
 > [!WARNING]
-> **Authorized testing only.** Active phases refuse to run unless a scope
-> allowlist exists and you have confirmed authorization. A resolving subdomain
-> or a shared IP is **not** automatically in scope. Every external command is
-> logged to `evidence/commands.log` (UTC time, exact argv, output file, exit).
+> **Authorized testing only.** The active phases do not run without a scope
+> allowlist and your confirmed authorization. A subdomain that resolves, or a
+> shared IP, is **not** in scope by default. reconkit logs every external
+> command to `evidence/commands.log` with the UTC time, the exact argv, the
+> output file, and the exit code.
 
 ## Install
 
@@ -77,11 +78,12 @@ cd reconkit
 ./install.sh          # = python3 recon.py deps : checks your OS and offers to install tools
 ```
 
-`deps` detects the platform (Arch/Omarchy, Debian/Ubuntu/**Kali**, Fedora, macOS),
-lists which required/optional tools are missing, and asks:
-**[I]nstall for me / [P]rint commands, I'll do it / [S]kip**. It never installs
-without consent, runs repo installs with the terminal attached (so sudo/yay
-prompts are visible), and runs AUR installs as your user (never `sudo yay`).
+`deps` detects the platform (Arch/Omarchy, Debian/Ubuntu/**Kali**, Fedora,
+macOS). It lists the required and optional tools that are missing. Then it
+asks: **[I]nstall for me / [P]rint commands, I'll do it / [S]kip**. It never
+installs without your consent. It runs repo installs with the terminal
+attached, so you see the sudo and yay prompts. It runs AUR installs as your
+user, never as `sudo yay`.
 
 ```bash
 python3 recon.py deps              # interactive check + install
@@ -89,16 +91,17 @@ python3 recon.py deps --check      # report only, never install
 python3 recon.py deps --print      # print the commands for you to run
 ```
 
-Only Python 3 and the core CLI tools (`dig nmap nc curl openssl whois ip ss`)
-are required. `ffuf`/`gobuster`/`subfinder`/`theHarvester`/SecLists are optional
-— native fallbacks run without them.
+reconkit needs only Python 3 and the core CLI tools
+(`dig nmap nc curl openssl whois ip ss`). The tools `ffuf`, `gobuster`,
+`subfinder`, `theHarvester`, and SecLists are optional. Native fallbacks run
+without them.
 
 | Platform | Install |
 | --- | --- |
 | **Kali** (intended runtime) | `sudo apt-get install -y nmap ffuf gobuster seclists theharvester dnsutils netcat-openbsd whois` |
-| **Arch / Omarchy** | `gobuster` from the repo; `ffuf-bin` / `subfinder-bin` / `seclists-git` from the AUR |
+| **Arch / Omarchy** | `gobuster` from the repo. `ffuf-bin` / `subfinder-bin` / `seclists-git` from the AUR |
 | **subfinder** (any) | `go install github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest` |
-| **theHarvester on Arch** | AUR build currently fails against `flit_core` 4 — use `sudo pacman -S python-pipx && pipx install theHarvester` |
+| **theHarvester on Arch** | AUR build currently fails against `flit_core` 4. Use `sudo pacman -S python-pipx && pipx install theHarvester` |
 
 ## Commands
 
@@ -125,17 +128,17 @@ Combined external + internal reconnaissance orchestrator (authorized testing onl
 
 ## Interactive shell
 
-Run `recon.py` with no arguments (or `recon.py shell`) to drop into an
-interactive prompt. It draws the banner and lets you type the commands below
-directly — `init example.com --host www.example.com`, then `passive`, `scope`,
-etc. — without re-typing `python3 recon.py` each time. The current case is
-shared across commands just like the plain CLI. `help` lists commands,
-`help <command>` shows a command's options, and `exit` (or Ctrl-D) quits.
+Run `recon.py` with no arguments, or run `recon.py shell`, to start an
+interactive prompt. It draws the banner. You then type the commands directly,
+like `init example.com --host www.example.com`, then `passive`, then `scope`.
+You do not retype `python3 recon.py` each time. All commands share the current
+case, the same as the plain CLI. `help` lists the commands. `help <command>`
+shows the options for a command. `exit` or Ctrl-D quits.
 
 ## Workflow
 
-Every phase feeds the next, and the active side of the pipeline is sealed behind
-an authorization gate that will not open on a resolving hostname alone:
+Each phase feeds the next. An authorization gate guards the active side of the
+pipeline. The gate does not open for a hostname that only resolves.
 
 ```text
    ┌── passive ──┬── harvest ──┬── scope ──┐
@@ -189,9 +192,9 @@ python3 recon.py analyze
 python3 recon.py report
 ```
 
-`python3 recon.py all example.com --host www.example.com` chains
-init → passive → harvest → scope, and continues into active/analyze/report
-only if the scope is marked authorized.
+The command `python3 recon.py all example.com --host www.example.com` chains
+init, passive, harvest, and scope. It continues into active, analyze, and
+report only when you mark the scope as authorized.
 
 ## Internal mode (post-foothold)
 
@@ -228,24 +231,26 @@ recon/<target>/<UTC-stamp>/
 
 ## Design notes / limits
 
-- **Leads, not verdicts.** A banner or version string is labelled
-  *"possible / needs validation"*. No exploit checks, credential attempts, or
-  `vuln` NSE categories are ever run.
-- **Soft-404 calibration.** The content fuzzer probes random paths first and
-  filters catch-all 200 responses, so a wildcard server doesn't fill the report
-  with fake hits. It does not follow redirects; 301/302/401/403 are reported.
-- **Ranking.** Leads are ordered RCE-adjacent first, then by severity, then
-  confidence, and `analyze` prints the single primary point to elaborate.
-- Keeps IPv4/IPv6 separate and records which address was contacted.
-- `-p-`, `-O`, `-sU`, and subnet sweeps are behind explicit flags; `sudo` is
-  only ever invoked (as `sudo -n`) for `-O`/`-sU`, never silently elsewhere.
+- **Leads, not verdicts.** reconkit labels a banner or version string as
+  *"possible / needs validation"*. It never runs exploit checks, credential
+  attempts, or `vuln` NSE categories.
+- **Soft-404 calibration.** The content fuzzer probes random paths first. It
+  filters catch-all 200 responses, so a wildcard server does not fill the
+  report with false hits. The fuzzer does not follow redirects. It reports 301,
+  302, 401, and 403.
+- **Ranking.** reconkit orders leads RCE-adjacent first, then by severity, then
+  by confidence. `analyze` prints the one primary point to elaborate.
+- reconkit keeps IPv4 and IPv6 separate. It records which address it contacted.
+- Explicit flags guard `-p-`, `-O`, `-sU`, and subnet sweeps. reconkit calls
+  `sudo` (as `sudo -n`) only for `-O` and `-sU`. It never calls `sudo` anywhere
+  else.
 
 ## License
 
 GPL-3.0-or-later. Copyright (C) 2026 Elchin Guliyev. See [LICENSE](LICENSE).
 
-For authorized security testing only. You are responsible for having written
-permission before running any active phase against a target you do not own.
+For authorized security testing only. You must have written permission before
+you run any active phase against a target that you do not own.
 
 <p align="center">
   <br>
